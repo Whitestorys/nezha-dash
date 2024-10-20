@@ -33,34 +33,35 @@ export default function ServerCard({
   return online ? (
     <Card
       className={
-        "flex flex-col items-center justify-start gap-3 p-3 md:px-5 lg:flex-row"
+        "flex flex-col items-center justify-start gap-3 p-3 md:px-5 lg:flex-row cursor-pointer"
       }
+      onClick={() => {
+        router.push(`/${locale}/${id}`);
+      }}
     >
-      <Popover>
-        <PopoverTrigger asChild>
-          <section className={"flex items-center justify-start gap-2 lg:w-28"}>
-            {showFlag ? <ServerFlag country_code={country_code} /> : null}
-            <p
-              className={cn(
-                "break-all font-bold tracking-tight",
-                showFlag ? "text-xs" : "text-sm",
-              )}
-            >
-              {name}
-            </p>
-            <span className="h-2 w-2 shrink-0 rounded-full bg-green-500"></span>
-          </section>
-        </PopoverTrigger>
-        <PopoverContent side="top">
-          <ServerCardPopover status={props.status} host={props.host} />
-        </PopoverContent>
-      </Popover>
-      <div
-        onClick={() => {
-          router.push(`/${locale}/${id}`);
-        }}
-        className="flex flex-col gap-2 cursor-pointer"
+      <section
+        className="grid items-center gap-2 lg:w-28 "
+        style={{ gridTemplateColumns: "auto auto 1fr" }}
       >
+        <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 self-center"></span>
+        <div
+          className={cn(
+            "flex items-center justify-center",
+            showFlag ? "min-w-[17px]" : "min-w-0",
+          )}
+        >
+          {showFlag ? <ServerFlag country_code={country_code} /> : null}
+        </div>
+        <p
+          className={cn(
+            "break-all font-bold tracking-tight",
+            showFlag ? "text-xs" : "text-sm",
+          )}
+        >
+          {name}
+        </p>
+      </section>
+      <div className="flex flex-col gap-2">
         <section className={"grid  grid-cols-5 items-center gap-3"}>
           <div className={"flex w-14 flex-col"}>
             <p className="text-xs text-muted-foreground">{t("CPU")}</p>
@@ -99,7 +100,7 @@ export default function ServerCard({
         {showNetTransfer && (
           <section
             onClick={() => {
-              router.push(`/${locale}/${id}`);
+              router.push(`/${locale}/network/${id}`);
             }}
             className={"flex items-center justify-between gap-1"}
           >
@@ -121,14 +122,28 @@ export default function ServerCard({
     </Card>
   ) : (
     <Card
-      className={
-        "flex flex-col items-center justify-start gap-3 p-3 md:px-5 lg:flex-row"
-      }
+      className={cn(
+        "flex flex-col items-center justify-start gap-3 p-3 md:px-5 lg:flex-row",
+        showNetTransfer
+          ? "lg:min-h-[91px] min-h-[123px]"
+          : "lg:min-h-[61px] min-h-[93px]",
+      )}
     >
       <Popover>
         <PopoverTrigger asChild>
-          <section className={"flex items-center justify-start gap-2 lg:w-28"}>
-            {showFlag ? <ServerFlag country_code={country_code} /> : null}
+          <section
+            className="grid items-center gap-2 lg:w-28"
+            style={{ gridTemplateColumns: "auto auto 1fr" }}
+          >
+            <span className="h-2 w-2 shrink-0 rounded-full bg-red-500 self-center"></span>
+            <div
+              className={cn(
+                "flex items-center justify-center",
+                showFlag ? "min-w-[17px]" : "min-w-0",
+              )}
+            >
+              {showFlag ? <ServerFlag country_code={country_code} /> : null}
+            </div>
             <p
               className={cn(
                 "break-all font-bold tracking-tight",
@@ -137,7 +152,6 @@ export default function ServerCard({
             >
               {name}
             </p>
-            <span className="h-2 w-2 shrink-0 rounded-full bg-red-500"></span>
           </section>
         </PopoverTrigger>
         <PopoverContent className="w-fit p-2" side="top">

@@ -12,8 +12,6 @@ import { ThemeProvider } from "next-themes";
 import { Inter as FontSans } from "next/font/google";
 import React from "react";
 
-import "/node_modules/flag-icons/css/flag-icons.min.css";
-
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -54,10 +52,15 @@ export default function LocaleLayout({
   unstable_setRequestLocale(locale);
 
   const messages = useMessages();
+
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
         <PublicEnvScript />
+        <link
+          rel="stylesheet"
+          href="https://cdn.jsdelivr.net/gh/lipis/flag-icons@7.0.0/css/flag-icons.min.css"
+        />
       </head>
       <body
         className={cn(

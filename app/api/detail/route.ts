@@ -1,5 +1,8 @@
 import { NezhaAPISafe } from "@/app/[locale]/types/nezha-api";
+import { auth } from "@/auth";
+import getEnv from "@/lib/env-entry";
 import { GetServerDetail } from "@/lib/serverFetch";
+import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +12,11 @@ interface NezhaDataResponse {
   data?: NezhaAPISafe;
 }
 
-export async function GET(req: Request) {
+export const GET = auth(async function GET(req) {
+  if (!req.auth && getEnv("SitePassword")) {
+    redirect("/");
+  }
+
   const { searchParams } = new URL(req.url);
   const server_id = searchParams.get("server_id");
   if (!server_id) {
@@ -26,4 +33,4 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: response.error }, { status: 400 });
   }
   return NextResponse.json(response, { status: 200 });
-}
+});

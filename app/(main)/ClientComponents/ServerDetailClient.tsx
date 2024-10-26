@@ -1,7 +1,7 @@
 "use client";
 
-import { ServerDetailLoading } from "@/app/[locale]/(main)/ClientComponents/ServerDetailLoading";
-import { NezhaAPISafe } from "@/app/[locale]/types/nezha-api";
+import { ServerDetailLoading } from "@/app/(main)/ClientComponents/ServerDetailLoading";
+import { NezhaAPISafe, ServerApi } from "@/app/types/nezha-api";
 import { BackIcon } from "@/components/Icon";
 import ServerFlag from "@/components/ServerFlag";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
+import useSWRImmutable from "swr/immutable";
 
 export default function ServerDetailClient({
   server_id,
@@ -20,7 +21,6 @@ export default function ServerDetailClient({
 }) {
   const t = useTranslations("ServerDetailClient");
   const router = useRouter();
-  const locale = useLocale();
 
   const [hasHistory, setHasHistory] = useState(false);
 
@@ -30,11 +30,10 @@ export default function ServerDetailClient({
 
   useEffect(() => {
     const previousPath = sessionStorage.getItem("lastPath");
-    const currentPath = window.location.pathname;
-
-    if (previousPath && previousPath !== currentPath) {
+    if (previousPath) {
       setHasHistory(true);
     } else {
+      const currentPath = window.location.pathname;
       sessionStorage.setItem("lastPath", currentPath);
     }
   }, []);
@@ -43,15 +42,27 @@ export default function ServerDetailClient({
     if (hasHistory) {
       router.back();
     } else {
-      router.push(`/${locale}/`);
+      router.push(`/`);
     }
   };
+
+  const { data: allFallbackData } = useSWRImmutable<ServerApi>(
+    "/api/server",
+    nezhaFetcher,
+  );
+  const fallbackData = allFallbackData?.result?.find(
+    // @ts-ignore
+    (item) => item.id === server_id,
+  );
 
   const { data, error } = useSWR<NezhaAPISafe>(
     `/api/detail?server_id=${server_id}`,
     nezhaFetcher,
     {
       refreshInterval: Number(getEnv("NEXT_PUBLIC_NezhaFetchInterval")) || 5000,
+      fallbackData,
+      revalidateOnMount: false,
+      revalidateIfStale: false,
     },
   );
 

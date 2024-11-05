@@ -3,14 +3,9 @@ import ServerFlag from "@/components/ServerFlag";
 import ServerUsageBar from "@/components/ServerUsageBar";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import getEnv from "@/lib/env-entry";
 import { cn, formatBytes, formatNezhaInfo } from "@/lib/utils";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -21,22 +16,29 @@ export default function ServerCard({
 }) {
   const t = useTranslations("ServerCard");
   const router = useRouter();
-  const { id, name, country_code, online, cpu, up, down, mem, stg, ...props } =
+  const { id, name, country_code, online, cpu, up, down, mem, stg, tcp, udp } =
     formatNezhaInfo(serverInfo);
 
   const showFlag = getEnv("NEXT_PUBLIC_ShowFlag") === "true";
-
   const showNetTransfer = getEnv("NEXT_PUBLIC_ShowNetTransfer") === "true";
+  const fixedTopServerName =
+    getEnv("NEXT_PUBLIC_FixedTopServerName") === "true";
 
   return online ? (
     <Link href={`/${id}`} prefetch={true}>
       <Card
-        className={
-          "flex flex-col items-center justify-start gap-3 p-3 md:px-5 lg:flex-row cursor-pointer"
-        }
+        className={cn(
+          "flex flex-col items-center justify-start gap-3 p-3 md:px-5 cursor-pointer",
+          {
+            "flex-col": fixedTopServerName,
+            "lg:flex-row": !fixedTopServerName,
+          },
+        )}
       >
         <section
-          className="grid items-center gap-2 lg:w-28 "
+          className={cn("grid items-center gap-2", {
+            "lg:w-40": !fixedTopServerName,
+          })}
           style={{ gridTemplateColumns: "auto auto 1fr" }}
         >
           <span className="h-2 w-2 shrink-0 rounded-full bg-green-500 self-center"></span>
@@ -48,17 +50,23 @@ export default function ServerCard({
           >
             {showFlag ? <ServerFlag country_code={country_code} /> : null}
           </div>
-          <p
-            className={cn(
-              "break-all font-bold tracking-tight",
-              showFlag ? "text-xs" : "text-sm",
-            )}
-          >
-            {name}
-          </p>
+          <div className="relative">
+            <p
+              className={cn(
+                "break-all font-bold tracking-tight",
+                showFlag ? "text-xs" : "text-sm",
+              )}
+            >
+              {name}
+            </p>
+          </div>
         </section>
         <div className="flex flex-col gap-2">
-          <section className={"grid  grid-cols-5 items-center gap-3"}>
+          <section
+            className={cn("grid grid-cols-5 items-center gap-3", {
+              "lg:grid-cols-7": fixedTopServerName,
+            })}
+          >
             <div className={"flex w-14 flex-col"}>
               <p className="text-xs text-muted-foreground">{t("CPU")}</p>
               <div className="flex items-center text-xs font-semibold">
@@ -96,6 +104,28 @@ export default function ServerCard({
                   : `${down.toFixed(2)}M/s`}
               </div>
             </div>
+            {fixedTopServerName && (
+              <div className={" w-14 flex-col hidden lg:flex"}>
+                <p className="text-xs text-muted-foreground">TCP</p>
+                <div className="flex items-center text-xs font-semibold gap-1">
+                  <span className="relative inline-flex  size-1.5 rounded-full bg-[hsl(var(--chart-1))]"></span>
+                  <div className="flex items-center text-xs font-semibold">
+                    {tcp}
+                  </div>
+                </div>
+              </div>
+            )}
+            {fixedTopServerName && (
+              <div className={"w-14 flex-col hidden lg:flex"}>
+                <p className="text-xs text-muted-foreground">UDP</p>
+                <div className="flex items-center text-xs font-semibold gap-1">
+                  <span className="relative inline-flex  size-1.5 rounded-full bg-[hsl(var(--chart-4))]"></span>
+                  <div className="flex items-center text-xs font-semibold">
+                    {udp}
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
           {showNetTransfer && (
             <section
@@ -124,41 +154,42 @@ export default function ServerCard({
   ) : (
     <Card
       className={cn(
-        "flex flex-col items-center justify-start gap-3 p-3 md:px-5 lg:flex-row",
+        "flex flex-col items-center justify-start gap-3 p-3 md:px-5",
         showNetTransfer
           ? "lg:min-h-[91px] min-h-[123px]"
           : "lg:min-h-[61px] min-h-[93px]",
+        {
+          "flex-col": fixedTopServerName,
+          "lg:flex-row": !fixedTopServerName,
+        },
       )}
     >
-      <Popover>
-        <PopoverTrigger asChild>
-          <section
-            className="grid items-center gap-2 lg:w-28"
-            style={{ gridTemplateColumns: "auto auto 1fr" }}
+      <section
+        className={cn("grid items-center gap-2", {
+          "lg:w-40": !fixedTopServerName,
+        })}
+        style={{ gridTemplateColumns: "auto auto 1fr" }}
+      >
+        <span className="h-2 w-2 shrink-0 rounded-full bg-red-500 self-center"></span>
+        <div
+          className={cn(
+            "flex items-center justify-center",
+            showFlag ? "min-w-[17px]" : "min-w-0",
+          )}
+        >
+          {showFlag ? <ServerFlag country_code={country_code} /> : null}
+        </div>
+        <div className="relative">
+          <p
+            className={cn(
+              "break-all font-bold tracking-tight",
+              showFlag ? "text-xs max-w-[80px]" : "text-sm",
+            )}
           >
-            <span className="h-2 w-2 shrink-0 rounded-full bg-red-500 self-center"></span>
-            <div
-              className={cn(
-                "flex items-center justify-center",
-                showFlag ? "min-w-[17px]" : "min-w-0",
-              )}
-            >
-              {showFlag ? <ServerFlag country_code={country_code} /> : null}
-            </div>
-            <p
-              className={cn(
-                "break-all font-bold tracking-tight",
-                showFlag ? "text-xs" : "text-sm",
-              )}
-            >
-              {name}
-            </p>
-          </section>
-        </PopoverTrigger>
-        <PopoverContent className="w-fit p-2" side="top">
-          <p className="text-sm text-muted-foreground">{t("Offline")}</p>
-        </PopoverContent>
-      </Popover>
+            {name}
+          </p>
+        </div>
+      </section>
     </Card>
   );
 }

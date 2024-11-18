@@ -1,17 +1,19 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { m } from "framer-motion";
 import { useTranslations } from "next-intl";
 import React, { createRef, useEffect, useRef } from "react";
 
 export default function Switch({
   allTag,
   nowTag,
+  tagCountMap,
   onTagChange,
 }: {
   allTag: string[];
   nowTag: string;
+  tagCountMap: Record<string, number>;
   onTagChange: (tag: string) => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -74,7 +76,7 @@ export default function Switch({
             )}
           >
             {nowTag === tag && (
-              <motion.div
+              <m.div
                 layoutId="nav-item"
                 className="absolute inset-0 z-10 h-full w-full content-center bg-white shadow-lg shadow-black/5 dark:bg-stone-700 dark:shadow-white/5"
                 style={{
@@ -84,9 +86,14 @@ export default function Switch({
               />
             )}
             <div className="relative z-20 flex items-center gap-1">
-              <p className="whitespace-nowrap">
-                {tag === "defaultTag" ? t("defaultTag") : tag}
-              </p>
+              <div className="whitespace-nowrap flex items-center gap-2">
+                {tag === "defaultTag" ? t("defaultTag") : tag}{" "}
+                {tag !== "defaultTag" && (
+                  <div className="w-fit px-1.5 rounded-full bg-muted">
+                    {tagCountMap[tag]}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         ))}

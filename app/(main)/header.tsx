@@ -7,12 +7,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import getEnv from "@/lib/env-entry";
 import { DateTime } from "luxon";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
+import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 
 function Header() {
   const t = useTranslations("Header");
+  const { resolvedTheme } = useTheme();
   const customLogo = getEnv("NEXT_PUBLIC_CustomLogo");
   const customTitle = getEnv("NEXT_PUBLIC_CustomTitle");
   const customDescription = getEnv("NEXT_PUBLIC_CustomDescription");
@@ -30,13 +31,18 @@ function Header() {
           className="flex cursor-pointer items-center text-base font-medium"
         >
           <div className="mr-1 flex flex-row items-center justify-start">
-            <Image
+            <img
               width={40}
               height={40}
-              unoptimized
               alt="apple-touch-icon"
-              src={customLogo ? customLogo : "/apple-touch-icon.png"}
-              className="relative !m-0 border-2 border-transparent h-6 w-6 object-cover object-top !p-0"
+              src={
+                customLogo
+                  ? customLogo
+                  : resolvedTheme === "light"
+                    ? "/apple-touch-icon.png"
+                    : "/apple-touch-icon-dark.png"
+              }
+              className="relative m-0! border-2 border-transparent h-6 w-6 object-cover object-top p-0!"
             />
           </div>
           {customTitle ? customTitle : "NezhaDash"}
@@ -128,7 +134,7 @@ function Overview() {
           {t("p_2390-2457_wherethetimeis")}
         </p>
         {mouted ? (
-          <p className="opacity-1 text-sm font-medium">{timeString}</p>
+          <p className="text-sm font-medium">{timeString}</p>
         ) : (
           <Skeleton className="h-[20px] w-[50px] rounded-[5px] bg-muted-foreground/10 animate-none"></Skeleton>
         )}

@@ -203,13 +203,31 @@ export default function ServerDetailClient({
         <Card className="rounded-[10px] bg-transparent border-none shadow-none">
           <CardContent className="px-1.5 py-1">
             <section className="flex flex-col items-start gap-0.5">
+              <p className="text-xs text-muted-foreground">{t("Load")}</p>
+              {data.status.NetInTransfer ? (
+                <div className="text-xs">
+                  {data.status.Load1.toFixed(2)} /{" "}
+                  {data.status.Load5.toFixed(2)} /{" "}
+                  {data.status.Load15.toFixed(2)}
+                </div>
+              ) : (
+                <div className="text-xs">Unknown</div>
+              )}
+            </section>
+          </CardContent>
+        </Card>
+        <Card className="rounded-[10px] bg-transparent border-none shadow-none">
+          <CardContent className="px-1.5 py-1">
+            <section className="flex flex-col items-start gap-0.5">
               <p className="text-xs text-muted-foreground">{t("Upload")}</p>
               {data.status.NetOutTransfer ? (
                 <div className="text-xs">
                   {" "}
                   {formatBytes(data.status.NetOutTransfer)}{" "}
                 </div>
-              ) : null}
+              ) : (
+                <div className="text-xs">Unknown</div>
+              )}
             </section>
           </CardContent>
         </Card>
@@ -222,7 +240,9 @@ export default function ServerDetailClient({
                   {" "}
                   {formatBytes(data.status.NetInTransfer)}{" "}
                 </div>
-              ) : null}
+              ) : (
+                <div className="text-xs">Unknown</div>
+              )}
             </section>
           </CardContent>
         </Card>

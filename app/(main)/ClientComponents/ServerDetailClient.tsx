@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import getEnv from "@/lib/env-entry";
 import { cn, formatBytes, nezhaFetcher } from "@/lib/utils";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import useSWRImmutable from "swr/immutable";
@@ -43,13 +43,17 @@ export default function ServerDetailClient({
     }
   };
 
-  const { data: allFallbackData } = useSWRImmutable<ServerApi>(
+  const { data: allFallbackData, isLoading } = useSWRImmutable<ServerApi>(
     "/api/server",
     nezhaFetcher,
   );
   const fallbackData = allFallbackData?.result?.find(
     (item) => item.id === server_id,
   );
+
+  if (!fallbackData && !isLoading) {
+    notFound();
+  }
 
   const { data, error } = useSWR<NezhaAPISafe>(
     `/api/detail?server_id=${server_id}`,
@@ -187,7 +191,67 @@ export default function ServerDetailClient({
             <section className="flex flex-col items-start gap-0.5">
               <p className="text-xs text-muted-foreground">{t("CPU")}</p>
               {data?.host.CPU ? (
-                <div className="text-xs"> {data?.host.CPU}</div>
+                <div className="text-xs"> {data?.host.CPU.join(", ")}</div>
+              ) : (
+                <div className="text-xs">Unknown</div>
+              )}
+            </section>
+          </CardContent>
+        </Card>
+        <Card className="rounded-[10px] bg-transparent border-none shadow-none">
+          <CardContent className="px-1.5 py-1">
+            <section className="flex flex-col items-start gap-0.5">
+              <p className="text-xs text-muted-foreground">{"GPU"}</p>
+              {data?.host.GPU ? (
+                <div className="text-xs"> {data?.host.GPU.join(", ")}</div>
+              ) : (
+                <div className="text-xs">Unknown</div>
+              )}
+            </section>
+          </CardContent>
+        </Card>
+      </section>
+      <section className="flex flex-wrap gap-2 mt-1">
+        <Card className="rounded-[10px] bg-transparent border-none shadow-none">
+          <CardContent className="px-1.5 py-1">
+            <section className="flex flex-col items-start gap-0.5">
+              <p className="text-xs text-muted-foreground">{t("Load")}</p>
+              {data.status.NetInTransfer ? (
+                <div className="text-xs">
+                  {data.status.Load1.toFixed(2)} /{" "}
+                  {data.status.Load5.toFixed(2)} /{" "}
+                  {data.status.Load15.toFixed(2)}
+                </div>
+              ) : (
+                <div className="text-xs">Unknown</div>
+              )}
+            </section>
+          </CardContent>
+        </Card>
+        <Card className="rounded-[10px] bg-transparent border-none shadow-none">
+          <CardContent className="px-1.5 py-1">
+            <section className="flex flex-col items-start gap-0.5">
+              <p className="text-xs text-muted-foreground">{t("Upload")}</p>
+              {data.status.NetOutTransfer ? (
+                <div className="text-xs">
+                  {" "}
+                  {formatBytes(data.status.NetOutTransfer)}{" "}
+                </div>
+              ) : (
+                <div className="text-xs">Unknown</div>
+              )}
+            </section>
+          </CardContent>
+        </Card>
+        <Card className="rounded-[10px] bg-transparent border-none shadow-none">
+          <CardContent className="px-1.5 py-1">
+            <section className="flex flex-col items-start gap-0.5">
+              <p className="text-xs text-muted-foreground">{t("Download")}</p>
+              {data.status.NetInTransfer ? (
+                <div className="text-xs">
+                  {" "}
+                  {formatBytes(data.status.NetInTransfer)}{" "}
+                </div>
               ) : (
                 <div className="text-xs">Unknown</div>
               )}

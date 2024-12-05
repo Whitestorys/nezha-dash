@@ -14,7 +14,6 @@ import {
 } from "@heroicons/react/20/solid";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
-import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 
 export default function ServerOverviewClient() {
@@ -24,12 +23,11 @@ export default function ServerOverviewClient() {
   const { data, error, isLoading } = useSWR<ServerApi>(
     "/api/server",
     nezhaFetcher,
+    {
+      refreshInterval: Number(getEnv("NEXT_PUBLIC_NezhaFetchInterval")) || 2000,
+    },
   );
   const disableCartoon = getEnv("NEXT_PUBLIC_DisableCartoon") === "true";
-
-  const searchParams = useSearchParams();
-
-  const global = searchParams.get("global");
 
   if (error) {
     return (
@@ -47,14 +45,10 @@ export default function ServerOverviewClient() {
       <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Card
           onClick={() => {
-            if (!global) {
-              setFilter(false);
-              setStatus("all");
-            }
+            setFilter(false);
+            setStatus("all");
           }}
-          className={cn("cursor-pointer hover:border-blue-500 transition-all", {
-            "pointer-events-none": global,
-          })}
+          className={cn("cursor-pointer hover:border-blue-500 transition-all")}
         >
           <CardContent className="flex h-full items-center px-6 py-3">
             <section className="flex flex-col gap-1">
@@ -80,18 +74,13 @@ export default function ServerOverviewClient() {
         </Card>
         <Card
           onClick={() => {
-            if (!global) {
-              setFilter(false);
-              setStatus("online");
-            }
+            setFilter(false);
+            setStatus("online");
           }}
           className={cn(
             "cursor-pointer hover:ring-green-500 ring-1 ring-transparent transition-all",
             {
               "ring-green-500 ring-2 border-transparent": status === "online",
-            },
-            {
-              "pointer-events-none": global,
             },
           )}
         >
@@ -120,18 +109,13 @@ export default function ServerOverviewClient() {
         </Card>
         <Card
           onClick={() => {
-            if (!global) {
-              setFilter(false);
-              setStatus("offline");
-            }
+            setFilter(false);
+            setStatus("offline");
           }}
           className={cn(
             "cursor-pointer hover:ring-red-500 ring-1 ring-transparent transition-all",
             {
               "ring-red-500 ring-2 border-transparent": status === "offline",
-            },
-            {
-              "pointer-events-none": global,
             },
           )}
         >
@@ -160,53 +144,46 @@ export default function ServerOverviewClient() {
         </Card>
         <Card
           onClick={() => {
-            if (!global) {
-              setStatus("all");
-              setFilter(true);
-            }
+            setStatus("all");
+            setFilter(true);
           }}
           className={cn(
             "cursor-pointer hover:ring-purple-500 ring-1 ring-transparent transition-all",
             {
               "ring-purple-500 ring-2 border-transparent": filter === true,
             },
-            {
-              "pointer-events-none": global,
-            },
           )}
         >
-          <CardContent className="flex h-full items-center relative px-3 py-1 pr-0 sm:px-6 sm:py-3">
+          <CardContent className="flex h-full items-center relative px-6 py-3">
             <section className="flex flex-col gap-1 w-full">
               <div className="flex items-center w-full justify-between">
                 <p className="text-sm font-medium md:text-base">
                   {t("network")}
                 </p>
-                <section className="flex flex-row z-[999] bg-white/80 dark:bg-black/80 backdrop-blur-sm sm:items-center items-start pr-2 sm:pr-0 gap-1 ml-auto">
-                  <p className="sm:text-[12px] text-[10px]   text-nowrap font-medium">
-                    ↑{formatBytes(data?.total_out_bandwidth || 0)}
-                  </p>
-                  <p className="sm:text-[12px] text-[10px]  text-nowrap font-medium">
-                    ↓{formatBytes(data?.total_in_bandwidth || 0)}
-                  </p>
-                </section>
               </div>
               {data?.result ? (
                 <>
-                  <section className="flex flex-row mt-1.5 -mr-1 sm:items-center items-start gap-1">
-                    <p className="sm:text-[12px] flex items-center text-[10px] text-nowrap font-semibold">
-                      <ArrowUpCircleIcon className="size-3 mr-0.5 sm:mb-[1.1px]" />
+                  <section className="flex items-start flex-row z-[999] pr-2 sm:pr-0 gap-1">
+                    <p className="sm:text-[12px] text-[10px] text-blue-800 dark:text-blue-400   text-nowrap font-medium">
+                      ↑{formatBytes(data?.total_out_bandwidth)}
+                    </p>
+                    <p className="sm:text-[12px] text-[10px]  text-purple-800 dark:text-purple-400  text-nowrap font-medium">
+                      ↓{formatBytes(data?.total_in_bandwidth)}
+                    </p>
+                  </section>
+                  <section className="flex flex-col sm:flex-row -mr-1 sm:items-center items-start gap-1">
+                    <p className="text-[11px] flex items-center text-nowrap font-semibold">
+                      <ArrowUpCircleIcon className="size-3 mr-0.5 sm:mb-[1px]" />
                       {formatBytes(data?.total_out_speed)}/s
                     </p>
-                    <p className="sm:text-[12px] flex items-center text-[10px] text-nowrap font-semibold">
+                    <p className="text-[11px] flex items-center  text-nowrap font-semibold">
                       <ArrowDownCircleIcon className="size-3 mr-0.5" />
-                      {formatBytes(
-                        data?.total_in_speed,
-                      )}/s
+                      {formatBytes(data?.total_in_speed)}/s
                     </p>
                   </section>
                 </>
               ) : (
-                <div className="flex h-6 items-center">
+                <div className="flex h-[38px] items-center">
                   <Loader visible={true} />
                 </div>
               )}
